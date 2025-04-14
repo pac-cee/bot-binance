@@ -1,0 +1,26 @@
+# Node modules and build output
+node_modules/
+.next/
+
+# Environment variables
+.env*
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# IDE/editor config
+.vscode/
+.idea/
+*.swp
+
+# Misc
+coverage/
+
+# Do NOT ignore public/
+!public/

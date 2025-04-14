@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-// Dummy data for research/demo purposes
+import axios from 'axios';
 const now = Date.now();
 const generateHistory = (range: string) => {
   let points = 24;
@@ -18,9 +18,51 @@ const generateHistory = (range: string) => {
   }));
 };
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { symbol, assetType, range } = req.query;
-  // In a real app, fetch from DB or external API
-  const data = generateHistory((range as string) || '24h');
-  res.status(200).json(data);
+  try {
+    if (assetType === 'crypto') {
+      // Binance Klines API
+      let interval = '1h';
+      let limit = 24;
+      if (range === '7d') { interval = '1h'; limit = 7 * 24; }
+      if (range === 'all') { interval = '1d'; limit = 365; }
+      const resp = await axios.get(`https://api.binance.com/api/v3/klines`, {
+        params: { symbol, interval, limit }
+      });
+      const data = resp.data.map((k: any) => ({
+        timestamp: k[0],
+        price: parseFloat(k[4]),
+      }));
+      return res.status(200).json(data);
+    }
+    if (assetType === 'stock' || assetType === 'forex') {
+      // Alpha Vantage API
+      const key = process.env.ALPHA_VANTAGE_API_KEY;
+      if (!key) throw new Error('Alpha Vantage API key missing');
+      let functionType = assetType === 'stock' ? 'TIME_SERIES_DAILY_ADJUSTED' : 'FX_DAILY';
+      let url = `https://www.alphavantage.co/query?function=${functionType}`;
+      if (assetType === 'stock') url += `&symbol=${symbol}`;
+      if (assetType === 'forex') url += `&from_symbol=${symbol?.toString().slice(0,3)}&to_symbol=${symbol?.toString().slice(3,6)}`;
+      url += `&apikey=${key}`;
+      const resp = await axios.get(url);
+      let timeSeries = assetType === 'stock' ? resp.data['Time Series (Daily)'] : resp.data['Time Series FX (Daily)'];
+      if (!timeSeries) throw new Error('No data');
+      let data = Object.entries(timeSeries).map(([date, v]: any) => ({
+        timestamp: new Date(date).getTime(),
+        price: parseFloat(v['4. close'] || v['4. close'] || v['4. close'])
+      })).sort((a, b) => a.timestamp - b.timestamp);
+      if (range === '24h') data = data.slice(-2); // last 2 days
+      if (range === '7d') data = data.slice(-7);
+      if (range === 'all') data = data.slice(-365);
+      return res.status(200).json(data);
+    }
+    // fallback
+    const data = generateHistory((range as string) || '24h');
+    return res.status(200).json(data);
+  } catch (e) {
+    // fallback to dummy data
+    const data = generateHistory((range as string) || '24h');
+    return res.status(200).json(data);
+  }
 }

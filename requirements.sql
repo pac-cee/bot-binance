@@ -1,11 +1,3 @@
--- PostgreSQL schema for storing asset price history
-CREATE TABLE IF NOT EXISTS asset_prices (
-    id SERIAL PRIMARY KEY,
-    symbol VARCHAR(20) NOT NULL,
-    asset_type VARCHAR(10) NOT NULL, -- crypto, stock, forex
-    price NUMERIC NOT NULL,
-    timestamp TIMESTAMPTZ NOT NULL
-);
 
 -- If using TimescaleDB, convert table to hypertable:
 -- SELECT create_hypertable('asset_prices', 'timestamp');
