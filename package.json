@@ -9,12 +9,26 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.7",
+    "@radix-ui/react-dropdown-menu": "^2.1.7",
+    "@radix-ui/react-popover": "^1.1.7",
+    "@radix-ui/react-scroll-area": "^1.2.4",
+    "@radix-ui/react-tabs": "^1.1.4",
     "axios": "latest",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "lightweight-charts": "^5.0.5",
+    "lucide-react": "^0.488.0",
     "next": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "recharts": "latest"
+    "react-hook-form": "^7.55.0",
+    "react-sparklines": "^1.7.0",
+    "react-window": "^1.8.11",
+    "real-time-trading-dashboard": "file:",
+    "recharts": "latest",
+    "tailwind-merge": "^3.2.0",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@types/node": "latest",
@@ -22,6 +36,7 @@
     "autoprefixer": "^10.4.0",
     "postcss": "^8.4.0",
     "tailwindcss": "^3.4.0",
+    "tailwindcss-dark-mode-plugin": "^1.0.1",
     "typescript": "latest"
   }
 }

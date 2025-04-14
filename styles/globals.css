@@ -4,4 +4,38 @@
 
 body {
   font-family: 'Inter', sans-serif;
+  background-color: theme('colors.background.DEFAULT');
+  color: theme('colors.foreground.DEFAULT');
+  transition: background 0.2s, color 0.2s;
+}
+
+.dark body {
+  background-color: #181A20;
+  color: #EAECEF;
+}
+
+/* Card, Table, Button dark mode polish */
+.card, .dark .card {
+  background: #22262F;
+  color: #EAECEF;
+  border-radius: 1rem;
+  border: 1px solid #23262F;
+}
+.table, .dark .table {
+  background: transparent;
+  color: #EAECEF;
+}
+.table th, .table td, .dark .table th, .dark .table td {
+  background: transparent;
+  border-bottom: 1px solid #23262F;
+}
+.button, .dark .button {
+  background: #2B3139;
+  color: #FCD535;
+  border: none;
+  border-radius: 0.5rem;
+  transition: background 0.2s;
+}
+.button:hover, .dark .button:hover {
+  background: #23262F;
 }
