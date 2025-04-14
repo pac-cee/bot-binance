@@ -6,7 +6,8 @@ import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Tabs } from './ui/tabs';
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
+import { Sparklines, SparklinesLine } from 'react-sparklines';
 import { Table, TableHead, TableBody, TableRow, TableCell, TableHeader } from './ui/table';
 import { FixedSizeList as List } from 'react-window';
 
@@ -66,6 +67,8 @@ export default function AssetDashboard() {
   const [sortAsc, setSortAsc] = useState(true);
   const [tab, setTab] = useState<'pairs' | 'coins'>('pairs');
   const [selectedCoin, setSelectedCoin] = useState<string | null>(null);
+  // For sparklines: map symbol -> price history
+  const [priceHistory, setPriceHistory] = useState<Record<string, number[]>>({});
 
   // Fetch all Binance spot pairs (exchangeInfo)
   useEffect(() => {
@@ -116,6 +119,14 @@ export default function AssetDashboard() {
         updated[t.s] = parseFloat(t.c);
       }
       setPrices(prev => ({ ...prev, ...updated }));
+      setPriceHistory(prev => {
+        const next = { ...prev };
+        for (const symbol in updated) {
+          if (!next[symbol]) next[symbol] = [];
+          next[symbol] = [...next[symbol].slice(-29), updated[symbol]]; // last 30 points
+        }
+        return next;
+      });
     };
     return () => ws.close();
   }, [assets]);
@@ -317,6 +328,7 @@ export default function AssetDashboard() {
             const price = prices[best.symbol];
             const change = ticker24[best.symbol]?.priceChange;
             const changePct = ticker24[best.symbol]?.priceChangePercent;
+            const history = priceHistory[best.symbol] || [];
             return (
               <Card
                 key={coin}
@@ -332,6 +344,15 @@ export default function AssetDashboard() {
                   change ? (parseFloat(change) > 0 ? 'text-green-600' : 'text-red-600') : 'text-muted-foreground'
                 }>
                   {change ? `${parseFloat(change) > 0 ? '+' : ''}${parseFloat(change).toFixed(2)} (${parseFloat(changePct).toFixed(2)}%)` : '...'}
+                </div>
+                <div className="my-2">
+                  {history.length > 1 ? (
+                    <Sparklines data={history} width={80} height={24} margin={4}>
+                      <SparklinesLine color={change && parseFloat(change) > 0 ? '#16a34a' : '#dc2626'} />
+                    </Sparklines>
+                  ) : (
+                    <div className="h-6" />
+                  )}
                 </div>
                 <div className="text-xs text-muted-foreground">{assets.filter(a => a.name.startsWith(coin + '/')).length} pairs</div>
               </Card>
