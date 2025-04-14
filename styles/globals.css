@@ -4,38 +4,70 @@
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: theme('colors.background.DEFAULT');
-  color: theme('colors.foreground.DEFAULT');
+  background-color: #111827;
+  color: #e5e7eb;
   transition: background 0.2s, color 0.2s;
 }
 
-.dark body {
-  background-color: #181A20;
-  color: #EAECEF;
+.light body {
+  background-color: #fff;
+  color: #1e293b;
 }
 
-/* Card, Table, Button dark mode polish */
-.card, .dark .card {
-  background: #22262F;
-  color: #EAECEF;
+.dark body {
+  background-color: #111827;
+  color: #e5e7eb;
+}
+
+/* Card, Table, Button blue/dark/light polish */
+.card, .dark .card, .light .card {
+  background: #1e293b;
+  color: #e5e7eb;
   border-radius: 1rem;
-  border: 1px solid #23262F;
+  border: 1px solid #334155;
+  box-shadow: 0 2px 16px 0 rgba(37,99,235,0.04);
 }
-.table, .dark .table {
+.light .card {
+  background: #f3f4f6;
+  color: #1e293b;
+  border: 1px solid #e5e7eb;
+}
+.table, .dark .table, .light .table {
   background: transparent;
-  color: #EAECEF;
+  color: inherit;
 }
-.table th, .table td, .dark .table th, .dark .table td {
+.table th, .table td, .dark .table th, .dark .table td, .light .table th, .light .table td {
   background: transparent;
-  border-bottom: 1px solid #23262F;
+  border-bottom: 1px solid #334155;
 }
-.button, .dark .button {
-  background: #2B3139;
-  color: #FCD535;
+.light .table th, .light .table td {
+  border-bottom: 1px solid #e5e7eb;
+}
+.button, .dark .button, .light .button {
+  background: #2563eb;
+  color: #fff;
   border: none;
   border-radius: 0.5rem;
-  transition: background 0.2s;
+  transition: background 0.2s, color 0.2s;
+  font-weight: 500;
+  box-shadow: 0 1px 4px 0 rgba(37,99,235,0.10);
 }
-.button:hover, .dark .button:hover {
-  background: #23262F;
+.button:hover, .dark .button:hover, .light .button:hover {
+  background: #3b82f6;
+  color: #fff;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  background: #1e293b;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 8px;
+}
+.light ::-webkit-scrollbar {
+  background: #f3f4f6;
+}
+.light ::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
 }

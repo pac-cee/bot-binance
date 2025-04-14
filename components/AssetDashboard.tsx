@@ -8,6 +8,7 @@ import { Input } from './ui/input';
 import { Tabs } from './ui/tabs';
 import { useMemo, useRef } from 'react';
 import { Sparklines, SparklinesLine } from 'react-sparklines';
+import { CoinModal } from './CoinModal';
 import { Table, TableHead, TableBody, TableRow, TableCell, TableHeader } from './ui/table';
 import { FixedSizeList as List } from 'react-window';
 
@@ -69,6 +70,10 @@ export default function AssetDashboard() {
   const [selectedCoin, setSelectedCoin] = useState<string | null>(null);
   // For sparklines: map symbol -> price history
   const [priceHistory, setPriceHistory] = useState<Record<string, number[]>>({});
+  // Coin modal state
+  const [coinModal, setCoinModal] = useState<null | { coin: string, best: { symbol: string, name: string } }>(null);
+  const [coinModalChartType, setCoinModalChartType] = useState<'line' | 'candle'>('line');
+  const [coinModalRange, setCoinModalRange] = useState<'24h' | '7d' | 'all'>('24h');
 
   // Fetch all Binance spot pairs (exchangeInfo)
   useEffect(() => {
@@ -323,6 +328,108 @@ export default function AssetDashboard() {
         )}
       </>}
       {tab === 'coins' && <>
+        {/* Popular Coins */}
+        <div className="mb-6">
+          <div className="text-lg font-bold mb-2 text-primary">Popular Coins</div>
+          <div className="flex gap-4 overflow-x-auto pb-2">
+            {["BTC","ETH","BNB","SOL","ADA","XRP","DOGE","TON","AVAX","SHIB"].map((coin) => {
+              const best = coins.find(([c]) => c === coin)?.[1];
+              if (!best) return null;
+              const price = prices[best.symbol];
+              const change = ticker24[best.symbol]?.priceChange;
+              const changePct = ticker24[best.symbol]?.priceChangePercent;
+              const history = priceHistory[best.symbol] || [];
+              return (
+                <Card
+                  key={coin}
+                  className={`min-w-[180px] max-w-[200px] p-4 flex-shrink-0 cursor-pointer border-2 ${selectedCoin === coin ? 'border-primary' : 'border-transparent'} hover:border-primary transition-shadow shadow-lg hover:shadow-xl`}
+                  onClick={() => {
+                    setSelectedCoin(coin === selectedCoin ? null : coin);
+                    setCoinModal({ coin, best });
+                    setCoinModalChartType('line');
+                    setCoinModalRange('24h');
+                  }}
+                >
+                  <div className="text-2xl font-bold mb-1">{coin}</div>
+                  <div className="font-mono text-lg">
+                    {price !== undefined ? price : '...'}
+                    <span className="text-xs ml-1 text-muted-foreground">{best.name.split('/')[1]}</span>
+                  </div>
+                  <div className={
+                    change ? (parseFloat(change) > 0 ? 'text-green-600' : 'text-red-600') : 'text-muted-foreground'
+                  }>
+                    {change ? `${parseFloat(change) > 0 ? '+' : ''}${parseFloat(change).toFixed(2)} (${parseFloat(changePct).toFixed(2)}%)` : '...'}
+                  </div>
+                  <div className="my-2">
+                    {history.length > 1 ? (
+                      <Sparklines data={history} width={80} height={24} margin={4}>
+                        <SparklinesLine color={change && parseFloat(change) > 0 ? '#16a34a' : '#dc2626'} />
+                      </Sparklines>
+                    ) : (
+                      <div className="h-6" />
+                    )}
+                  </div>
+                  <div className="text-xs text-muted-foreground">{assets.filter(a => a.name.startsWith(coin + '/')).length} pairs</div>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+        {/* Trending Coins */}
+        <div className="mb-6">
+          <div className="text-lg font-bold mb-2 text-accent">Trending Coins</div>
+          <div className="flex gap-4 overflow-x-auto pb-2">
+            {[...coins]
+              .sort((a, b) => {
+                const aSym = a[1].symbol;
+                const bSym = b[1].symbol;
+                const aChg = aSym ? parseFloat(ticker24[aSym]?.priceChangePercent || '0') : 0;
+                const bChg = bSym ? parseFloat(ticker24[bSym]?.priceChangePercent || '0') : 0;
+                return bChg - aChg;
+              })
+              .slice(0, 6)
+              .map(([coin, best]) => {
+                const price = prices[best.symbol];
+                const change = ticker24[best.symbol]?.priceChange;
+                const changePct = ticker24[best.symbol]?.priceChangePercent;
+                const history = priceHistory[best.symbol] || [];
+                return (
+                  <Card
+                    key={coin}
+                    className={`min-w-[180px] max-w-[200px] p-4 flex-shrink-0 cursor-pointer border-2 ${selectedCoin === coin ? 'border-primary' : 'border-transparent'} hover:border-primary transition-shadow shadow-lg hover:shadow-xl`}
+                    onClick={() => {
+                      setSelectedCoin(coin === selectedCoin ? null : coin);
+                      setCoinModal({ coin, best });
+                      setCoinModalChartType('line');
+                      setCoinModalRange('24h');
+                    }}
+                  >
+                    <div className="text-2xl font-bold mb-1">{coin}</div>
+                    <div className="font-mono text-lg">
+                      {price !== undefined ? price : '...'}
+                      <span className="text-xs ml-1 text-muted-foreground">{best.name.split('/')[1]}</span>
+                    </div>
+                    <div className={
+                      change ? (parseFloat(change) > 0 ? 'text-green-600' : 'text-red-600') : 'text-muted-foreground'
+                    }>
+                      {change ? `${parseFloat(change) > 0 ? '+' : ''}${parseFloat(change).toFixed(2)} (${parseFloat(changePct).toFixed(2)}%)` : '...'}
+                    </div>
+                    <div className="my-2">
+                      {history.length > 1 ? (
+                        <Sparklines data={history} width={80} height={24} margin={4}>
+                          <SparklinesLine color={change && parseFloat(change) > 0 ? '#16a34a' : '#dc2626'} />
+                        </Sparklines>
+                      ) : (
+                        <div className="h-6" />
+                      )}
+                    </div>
+                    <div className="text-xs text-muted-foreground">{assets.filter(a => a.name.startsWith(coin + '/')).length} pairs</div>
+                  </Card>
+                );
+              })}
+          </div>
+        </div>
+        {/* All Coins */}
         <div className="mb-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {coins.map(([coin, best]) => {
             const price = prices[best.symbol];
@@ -333,7 +440,12 @@ export default function AssetDashboard() {
               <Card
                 key={coin}
                 className={`p-4 cursor-pointer border-2 ${selectedCoin === coin ? 'border-primary' : 'border-transparent'} hover:border-primary`}
-                onClick={() => setSelectedCoin(coin === selectedCoin ? null : coin)}
+                onClick={() => {
+                  setSelectedCoin(coin === selectedCoin ? null : coin);
+                  setCoinModal({ coin, best });
+                  setCoinModalChartType('line');
+                  setCoinModalRange('24h');
+                }}
               >
                 <div className="text-xl font-bold">{coin}</div>
                 <div className="font-mono text-lg">
@@ -397,6 +509,24 @@ export default function AssetDashboard() {
           </div>
         )}
       </>}
+      {/* Coin Details Modal */}
+      {coinModal && (
+        <CoinModal
+          open={!!coinModal}
+          onClose={() => setCoinModal(null)}
+          coin={coinModal.coin}
+          pairSymbol={coinModal.best.symbol}
+          pairName={coinModal.best.name}
+          assetType="crypto"
+          price={prices[coinModal.best.symbol]}
+          change={ticker24[coinModal.best.symbol]?.priceChange}
+          changePct={ticker24[coinModal.best.symbol]?.priceChangePercent}
+          chartType={coinModalChartType}
+          setChartType={setCoinModalChartType}
+          range={coinModalRange}
+          setRange={setCoinModalRange}
+        />
+      )}
     </div>
   );
 }
