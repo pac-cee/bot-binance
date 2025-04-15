@@ -63,3 +63,4 @@ logs
 # Cache directories
 .cache/
 .next/cache/
+node_modules/
