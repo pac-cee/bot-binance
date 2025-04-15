@@ -72,5 +72,58 @@ npm run start
 
 ---
 
+## 🔗 Binance API Integration
+
+This project integrates with the official Binance API to provide real-time and historical trading data. Below is an overview of how API calls are made and where to find or add them in the codebase:
+
+### REST API Calls
+- **Fetching all spot pairs:**
+  - File: `components/AssetDashboard.tsx`
+  - Example: 
+    ```js
+    await axios.get('https://api.binance.com/api/v3/exchangeInfo');
+    ```
+- **Fetching 24hr ticker data:**
+  - File: `components/AssetDashboard.tsx`
+  - Example:
+    ```js
+    await axios.get('https://api.binance.com/api/v3/ticker/24hr');
+    ```
+- **Fetching historical candlestick data:**
+  - File: `components/CandlestickChart.tsx`
+  - Example:
+    ```js
+    await axios.get(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`);
+    ```
+- **Backend API routes:**
+  - Files: `pages/api/prices.ts`, `pages/api/history.ts`
+  - These files proxy requests to Binance for current prices and historical data.
+
+### WebSocket API Calls (Real-Time Data)
+- **Real-time mini ticker updates:**
+  - File: `components/AssetDashboard.tsx`
+  - Example:
+    ```js
+    new window.WebSocket('wss://stream.binance.com:9443/ws/!miniTicker@arr');
+    ```
+- **Real-time candlestick (kline) updates:**
+  - File: `components/CandlestickChart.tsx`
+  - Example:
+    ```js
+    new window.WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@kline_1h`);
+    ```
+
+### Where to Add New API Calls
+- **Frontend (React components):**
+  - Add calls directly in components inside the `components/` directory for UI-driven data fetching or WebSocket subscriptions.
+- **Backend (API routes):**
+  - Add new endpoints in `pages/api/` to proxy or aggregate data from Binance, especially if you want to keep your API keys or logic server-side.
+
+For more details, see:
+- [Binance REST API docs](https://binance-docs.github.io/apidocs/spot/en/)
+- [Binance WebSocket Streams](https://binance-docs.github.io/apidocs/spot/en/#websocket-market-streams)
+
+---
+
 ## 📝 License
 MIT
