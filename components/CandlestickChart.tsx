@@ -24,7 +24,7 @@ export default function CandlestickChart({ symbol, range, assetType }: Candlesti
     chartRef.current = createChart(chartContainerRef.current, {
       width: chartContainerRef.current.clientWidth,
       height: 300,
-      layout: { background: "white", textColor: '#222' },
+      layout: { background: 'white' as any, textColor: '#222' },
       grid: { vertLines: { color: '#eee' }, horzLines: { color: '#eee' } },
       timeScale: { timeVisible: true, secondsVisible: false },
     });

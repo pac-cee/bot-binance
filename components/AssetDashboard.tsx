@@ -12,6 +12,12 @@ import { CoinModal } from './CoinModal';
 import { Table, TableHead, TableBody, TableRow, TableCell, TableHeader } from './ui/table';
 import { FixedSizeList as List } from 'react-window';
 
+type Asset = {
+  symbol: string;
+  name: string;
+  assetType: string;
+};
+
 const assets = [
   { symbol: 'BTCUSDT', name: 'Bitcoin', assetType: 'crypto' },
   { symbol: 'ETHUSDT', name: 'Ethereum', assetType: 'crypto' },
