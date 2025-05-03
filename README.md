@@ -65,6 +65,40 @@ npm run start
 
 ---
 
+## 🐳 Docker Deployment
+
+### Build the Docker Image
+```bash
+docker build -t binance-dashboard .
+```
+
+### Run the Container
+```bash
+docker run -d -p 3000:3000 --name binance-dashboard binance-dashboard
+```
+
+The dashboard will be available at [http://localhost:3000](http://localhost:3000)
+
+### Docker Commands Reference
+- **Stop the container:**
+  ```bash
+  docker stop binance-dashboard
+  ```
+- **Start an existing container:**
+  ```bash
+  docker start binance-dashboard
+  ```
+- **Remove the container:**
+  ```bash
+  docker rm binance-dashboard
+  ```
+- **View logs:**
+  ```bash
+  docker logs -f binance-dashboard
+  ```
+
+---
+
 ## Folder Structure
 - `pages/` - Next.js pages (frontend & API routes)
 - `components/` - React components
