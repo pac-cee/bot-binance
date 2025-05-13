@@ -159,5 +159,218 @@ For more details, see:
 
 ---
 
+## 🏗️ System Architecture
+
+```mermaid
+flowchart LR
+    subgraph Frontend["Frontend Layer"]
+        N[Next.js App] --> U[UI Components]
+        U --> C[Asset Charts]
+        SP[Price Sparklines] --> U
+    end
+    
+    subgraph Backend["Backend Layer"]
+        AR[API Routes] --> WH[WebSocket Handler]
+        DB[(Price Cache)]
+    end
+    
+    subgraph Binance["Binance API"]
+        REST[REST API] 
+        WS[WebSocket API]
+    end
+
+    U --> AR
+    AR --> DB
+    AR --> REST
+    WH --> WS
+    WS --> WH
+    WH --> U
+    REST --> AR
+```
+
+### Architecture Overview
+- **Frontend Layer**: Next.js app with React components for real-time price displays and charts
+- **Backend Layer**: API routes for data fetching and WebSocket handler for live updates
+- **Data Flow**: 
+  - REST API calls for initial data and historical prices
+  - WebSocket connections for real-time price updates
+  - In-memory cache for optimal performance
+
+## ⚙️ Configuration Options
+
+### Environment Variables
+```env
+# Required
+BINANCE_API_KEY=your_api_key
+BINANCE_API_SECRET=your_api_secret
+
+# Optional
+PRICE_UPDATE_INTERVAL=1000  # Default: 1000ms
+WEBSOCKET_RECONNECT_DELAY=3000  # Default: 3000ms
+CACHE_DURATION=60  # Default: 60 seconds
+MAX_PAIRS_PER_REQUEST=100  # Default: 100
+```
+
+### WebSocket Configuration
+```typescript
+const wsConfig = {
+  reconnectAttempts: 5,
+  reconnectDelay: 3000,
+  pingInterval: 30000,
+  pongTimeout: 1000
+};
+```
+
+### Chart Configuration
+```typescript
+const chartConfig = {
+  theme: 'dark',  // 'dark' | 'light'
+  candlestickColors: {
+    up: '#26a69a',
+    down: '#ef5350',
+    unchanged: '#b6b6b6'
+  },
+  intervals: ['1m', '5m', '15m', '1h', '4h', '1d']
+};
+```
+
+## 🔧 Advanced Configuration
+
+### Cache Settings
+The dashboard uses in-memory caching for optimal performance. Configure cache behavior in `lib/utils.ts`:
+
+```typescript
+const CACHE_CONFIG = {
+  prices: {
+    ttl: 60,  // Time-to-live in seconds
+    checkPeriod: 120  // Cleanup interval
+  },
+  pairs: {
+    ttl: 3600,  // 1 hour
+    checkPeriod: 7200
+  }
+};
+```
+
+### Rate Limiting
+Built-in rate limiting follows Binance API restrictions:
+- REST API: 1200 requests per minute
+- WebSocket: 5 connections per IP
+- Order rate: 50 orders per 10 seconds
+
+## 🚀 Performance Optimization
+
+### Browser Performance
+1. **Memory Management**
+   - Unsubscribe from unused WebSocket streams
+   - Cleanup chart instances when switching pairs
+   - Use virtualized lists for large datasets
+
+2. **Network Optimization**
+   - Batch API requests where possible
+   - Use compression for API responses
+   - Implement proper WebSocket reconnection strategy
+
+3. **Rendering Performance**
+   - Implement proper React memo and useMemo
+   - Use Web Workers for heavy calculations
+   - Optimize chart redraws
+
+### Server Performance
+1. **Caching Strategy**
+   - In-memory cache for frequent data
+   - Implement stale-while-revalidate pattern
+   - Use proper cache invalidation
+
+2. **WebSocket Management**
+   - Implement connection pooling
+   - Handle reconnections gracefully
+   - Monitor connection health
+
+## 🔍 Troubleshooting
+
+### Common Issues
+
+1. **WebSocket Connection Issues**
+   ```
+   Error: WebSocket connection failed
+   ```
+   - Check network connectivity
+   - Verify WebSocket endpoint is accessible
+   - Ensure proper API key permissions
+
+2. **Rate Limit Exceeded**
+   ```
+   Error: APIError: Too many requests
+   ```
+   - Implement proper request throttling
+   - Use bulk endpoints where possible
+   - Check your API key rate limits
+
+3. **Chart Rendering Issues**
+   - Clear browser cache
+   - Update chart library version
+   - Check console for JavaScript errors
+
+### Debugging Tools
+
+1. **Network Monitoring**
+   - Use browser DevTools Network tab
+   - Monitor WebSocket frames
+   - Check API response times
+
+2. **Performance Profiling**
+   - React DevTools Profiler
+   - Chrome Performance tab
+   - Memory usage monitoring
+
+3. **Error Tracking**
+   - Check browser console
+   - Monitor server logs
+   - Use error boundary components
+
+## 📦 Production Deployment Tips
+
+### Checklist
+1. Set proper environment variables
+2. Enable error monitoring
+3. Configure proper CORS headers
+4. Set up SSL certificates
+5. Configure proper WebSocket timeouts
+6. Enable gzip compression
+7. Set up health check endpoints
+8. Configure proper logging
+
+### Monitoring
+- Track WebSocket connection status
+- Monitor memory usage
+- Track API response times
+- Set up error alerting
+- Monitor cache hit rates
+
+### Security
+- Use proper CORS configuration
+- Implement rate limiting
+- Secure WebSocket connections
+- Validate API inputs
+- Use proper error handling
+
+## 🤝 Contributing
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+
+### Development Workflow
+1. Fork the repository
+2. Create your feature branch
+3. Run tests and linting
+4. Submit a pull request
+
+### Code Style
+- Follow TypeScript best practices
+- Use proper ESLint configuration
+- Follow React hooks guidelines
+- Write meaningful comments
+- Include proper type definitions
+
 ## 📝 License
 MIT
